@@ -6,6 +6,8 @@ interface StatsPanelProps {
   cpuIntensity: number;
   fps: number;
   elapsedTime: number;
+  sequencePaused: boolean;
+  stepRemainingTime: number | null;
 }
 
 export const StatsPanel: React.FC<StatsPanelProps> = ({
@@ -13,7 +15,9 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({
   gpuRunning,
   cpuIntensity,
   fps,
-  elapsedTime
+  elapsedTime,
+  sequencePaused,
+  stepRemainingTime
 }) => {
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -22,27 +26,36 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({
   };
 
   return (
-    <div style={{ marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', rowGap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-      <div style={{ textAlign: 'center' }}>
+    <div style={{ marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', rowGap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ gridColumn: 'span 2', textAlign: 'center' }}>
         <div style={{ fontSize: '0.8em', opacity: 0.6 }}>ACTIVE THREADS</div>
         <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>{cpuRunning ? Math.round(cpuIntensity) : 0}</div>
       </div>
-      <div style={{ textAlign: 'center' }}>
+      <div style={{ gridColumn: 'span 2', textAlign: 'center' }}>
         <div style={{ fontSize: '0.8em', opacity: 0.6 }}>FPS</div>
-        <div style={{ fontSize: '1.5em', fontWeight: 'bold', color: fps < 30 ? '#ef4444' : fps < 50 ? '#facc15' : 'inherit' }}>
+        <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>
           {fps}
         </div>
       </div>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '0.8em', opacity: 0.6 }}>ELAPSED TIME</div>
-        <div style={{ fontSize: '1.5em', fontWeight: 'bold', fontFamily: 'monospace' }}>
-          {formatTime(elapsedTime)}
+      <div style={{ gridColumn: 'span 2', textAlign: 'center' }}>
+        <div style={{ fontSize: '0.8em', opacity: 0.6 }}>STEP REMAINING</div>
+        <div style={{ fontSize: '1.5em', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums', color: 'white' }}>
+          {stepRemainingTime !== null ? formatTime(stepRemainingTime) : '∞'}
         </div>
       </div>
-      <div style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
+      <div style={{ gridColumn: 'span 3', textAlign: 'center' }}>
         <div style={{ fontSize: '0.8em', opacity: 0.6 }}>STATUS</div>
-        <div style={{ fontSize: '1.5em', fontWeight: 'bold', color: (cpuRunning || gpuRunning) ? '#fca5a5' : '#86efac' }}>
-          {cpuRunning || gpuRunning ? 'TESTING' : 'IDLE'}
+        <div 
+          className={(cpuRunning || gpuRunning) ? "gradient-text" : ""}
+          style={{ fontSize: '1.5em', fontWeight: 'bold', color: (cpuRunning || gpuRunning) ? 'inherit' : sequencePaused ? '#60a5fa' : 'white' }}
+        >
+          {cpuRunning || gpuRunning ? 'TESTING' : sequencePaused ? 'COOLDOWN' : 'IDLE'}
+        </div>
+      </div>
+      <div style={{ gridColumn: 'span 3', textAlign: 'center' }}>
+        <div style={{ fontSize: '0.8em', opacity: 0.6 }}>ELAPSED TIME</div>
+        <div style={{ fontSize: '1.5em', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>
+          {formatTime(elapsedTime)}
         </div>
       </div>
     </div>
